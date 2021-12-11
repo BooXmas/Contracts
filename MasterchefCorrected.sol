@@ -1239,7 +1239,7 @@ abstract contract ReentrancyGuard {
 
 contract Xpast is BEP20 {
     
-    // Transfer tax rate in basis points. (default 4.5%)
+    // Transfer tax rate in basis points. (default 5%)
     uint16 public transferTaxRate = 500;
     
     // Burn Fee, in percent of transferTaxRate.
@@ -1248,70 +1248,22 @@ contract Xpast is BEP20 {
     // Liq Fee, in percent of transferTaxRate.
     uint16 public liqFee = 100 - burnFee;
     
-    // Max transfer tax rate: 10%.
+    // Max transfer tax rate: 20%.
     uint16 public constant maxTaxRate = 2000;
     
     // Fee address
-    address payable public feeAddr = 0xE62b207D82Fc3D6E9ff96F20Ee33D869aD2171b1;
+    address payable public constant feeAddr = 0xE62b207D82Fc3D6E9ff96F20Ee33D869aD2171b1;
     
     // Burn address
-    address public constant brunAddr = 0x000000000000000000000000000000000000dEaD;
+    address public constant burnAddr = 0x000000000000000000000000000000000000dEaD;
 
     // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr = 0x000000000000000000000000000000000000dEaD;
+    mapping(address => bool) public noTaxRecipient;
 
     // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr1 = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr1 = 0x000000000000000000000000000000000000dEaD;
+    mapping(address => bool) public noTaxSender;
 
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr2 = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr2 = 0x000000000000000000000000000000000000dEaD;
-
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr3 = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr3 = 0x000000000000000000000000000000000000dEaD;
-
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr4 = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr4 = 0x000000000000000000000000000000000000dEaD;
-
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr5 = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr5 = 0x000000000000000000000000000000000000dEaD;
-
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr6 = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr6 = 0x000000000000000000000000000000000000dEaD;
-
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr7 = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr7 = 0x000000000000000000000000000000000000dEaD;
-
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxRecipientAddr8 = 0x000000000000000000000000000000000000dEaD;
-    
-    // Contract address is excluded from tax, like Presale Cotract.
-    address public noTaxSenderAddr8 = 0x000000000000000000000000000000000000dEaD;
-
-    // Max transfer amount rate in basis points. (default is 2.5% of total supply)
+    // Max transfer amount rate in basis points. (default is 100% of total supply)
     uint16 public maxTransferAmountRate = 10000;
     
     // Addresses that excluded from antiWhale
@@ -1335,40 +1287,21 @@ contract Xpast is BEP20 {
     // The operator can call all functions except of minting XPAST
     address private _operator;
     
-    // The lpEarner address will be set to an Earning Contract which
-    // will distribute Xpast-WFTM LP token to Xpast Stakers!
-    address private lpEarner;
+    // The lpEarner address set to burn address to lock liquidity forever
+    address constant public lpEarner = 0x000000000000000000000000000000000000dEaD;
 
     // Events
     event OperatorTransferred(address indexed previousOperator, address indexed newOperator);
     event TransferTaxRateUpdated(address indexed operator, uint256 previousRate, uint256 newRate);
     event BurnFeeUpdated(address indexed operator, uint256 previousRate, uint256 newRate);
-    event LiqFeeUpdated(address indexed operator, uint256 previousRate, uint256 newRate);
     event MaxTransferAmountRateUpdated(address indexed operator, uint256 previousRate, uint256 newRate);
     event SwapAndLiquifyEnabledUpdated(address indexed operator, bool enabled);
     event MinAmountToLiquifyUpdated(address indexed operator, uint256 previousAmount, uint256 newAmount);
-    event IUpdated(address indexed operator, address indexed router, address indexed pair);
-    event SetNoTaxSenderAddr(address indexed operator, address indexed noTaxSenderAddr);
-    event SetNoTaxRecipientAddr(address indexed operator, address indexed noTaxRecipientAddr);
-    event SetNoTaxSenderAddr1(address indexed operator, address indexed noTaxSenderAddr1);
-    event SetNoTaxRecipientAddr1(address indexed operator, address indexed noTaxRecipientAddr1);
-    event SetNoTaxSenderAddr2(address indexed operator, address indexed noTaxSenderAddr2);
-    event SetNoTaxRecipientAddr2(address indexed operator, address indexed noTaxRecipientAddr2);
-    event SetNoTaxSenderAddr3(address indexed operator, address indexed noTaxSenderAddr3);
-    event SetNoTaxRecipientAddr3(address indexed operator, address indexed noTaxRecipientAddr3);
-    event SetNoTaxSenderAddr4(address indexed operator, address indexed noTaxSenderAddr4);
-    event SetNoTaxRecipientAddr4(address indexed operator, address indexed noTaxRecipientAddr4);
-    event SetNoTaxSenderAddr5(address indexed operator, address indexed noTaxSenderAddr5);
-    event SetNoTaxRecipientAddr5(address indexed operator, address indexed noTaxRecipientAddr5);
-    event SetNoTaxSenderAddr6(address indexed operator, address indexed noTaxSenderAddr6);
-    event SetNoTaxRecipientAddr6(address indexed operator, address indexed noTaxRecipientAddr6);
-    event SetNoTaxSenderAddr7(address indexed operator, address indexed noTaxSenderAddr7);
-    event SetNoTaxRecipientAddr7(address indexed operator, address indexed noTaxRecipientAddr7);
-    event SetNoTaxSenderAddr8(address indexed operator, address indexed noTaxSenderAddr8);
-    event SetNoTaxRecipientAddr8(address indexed operator, address indexed noTaxRecipientAddr8);
-    
-    event SetLpEarnerAddr(address indexed operator, address indexed SetLpEarnerAddr);
+    event SwapRouterUpdated(address indexed operator, address indexed router, address indexed pair);
+    event SetNoTaxSenderAddr(address indexed operator, address indexed noTaxSenderAddr, bool _value);
+    event SetNoTaxRecipientAddr(address indexed operator, address indexed noTaxRecipientAddr, bool _value);
     event SwapAndLiquify(uint256 tokensSwapped, uint256 ethReceived, uint256 tokensIntoLiqudity);
+    event SetExcludedFromAntiWhale(address indexed operator, address indexed accountAddress, bool excluded);
 
     modifier onlyOperator() {
         require(_operator == msg.sender, "operator: caller is not the operator");
@@ -1403,16 +1336,17 @@ contract Xpast is BEP20 {
     /**
      * @notice Constructs the XpastSwapToken contract.
      */
-    constructor() public BEP20("Xmas Past", "XPAST") {
+    constructor() public BEP20("Good Dog", "XPAST") {
         _operator = _msgSender();
-        lpEarner = _msgSender();
         emit OperatorTransferred(address(0), _operator);
 
         _excludedFromAntiWhale[msg.sender] = true;
         _excludedFromAntiWhale[address(0)] = true;
         _excludedFromAntiWhale[address(this)] = true;
-        _excludedFromAntiWhale[brunAddr] = true;
+        _excludedFromAntiWhale[burnAddr] = true;
     }
+
+    
 
     /// @notice Creates `_amount` token to `_to`. Must only be called by the owner (MasterChef).
     function mint(address _to, uint256 _amount) public onlyOwner {
@@ -1427,28 +1361,30 @@ contract Xpast is BEP20 {
             && _inSwapAndLiquify == false
             && address(swapRouter) != address(0)
             && swapPair != address(0)
-            && sender != swapPair           // excludes Buying in BNB Liquidity
+            && sender != swapPair           // excludes Buying in FTM Liquidity
             && sender != owner()            // excludes owner (later MasterChef)
         ) { swapAndLiquify(); }
 
-        if (recipient == brunAddr || sender == _operator || sender == noTaxSenderAddr || recipient == noTaxRecipientAddr || sender == noTaxSenderAddr1 || recipient == noTaxRecipientAddr1 || sender == noTaxSenderAddr2 || recipient == noTaxRecipientAddr2 || sender == noTaxSenderAddr3 || recipient == noTaxRecipientAddr3 || sender == noTaxSenderAddr4 || recipient == noTaxRecipientAddr4 || sender == noTaxSenderAddr5 || recipient == noTaxRecipientAddr5 || sender == noTaxSenderAddr6 || recipient == noTaxRecipientAddr6 || sender == noTaxSenderAddr7 || recipient == noTaxRecipientAddr7 || sender == noTaxSenderAddr8 || recipient == noTaxRecipientAddr8 || transferTaxRate == 0 ) {
+        if (recipient == burnAddr || sender == _operator ||
+        noTaxRecipient[recipient] || noTaxSender[sender] ||
+        transferTaxRate == 0 ) {
+
             super._transfer(sender, recipient, amount);  // transfer with no Tax
             
         } else {
-            // default tax is 4% of every transfer
+            // default tax is 5% of every transfer
             uint256 taxAmount = amount.mul(transferTaxRate).div(10000);
             uint256 burnAmount = taxAmount.mul(burnFee).div(100);
             uint256 liqAmount = taxAmount.sub(burnAmount);
             require(taxAmount == burnAmount + liqAmount, "XPAST::transfer: Burn value invalid");
 
-            // default 96% of transfer sent to recipient
+            // default 95% of transfer sent to recipient
             uint256 sendAmount = amount.sub(taxAmount);
             require(amount == sendAmount + taxAmount, "XPAST::transfer: Tax value invalid");
 
-            super._transfer(sender, brunAddr, burnAmount);
+            super._transfer(sender, burnAddr, burnAmount);
             super._transfer(sender, address(this), liqAmount);
             super._transfer(sender, recipient, sendAmount);
-            amount = sendAmount;
         }
     }
 
@@ -1512,7 +1448,7 @@ contract Xpast is BEP20 {
             tokenAmount,
             0, // slippage is unavoidable
             0, // slippage is unavoidable
-            viewLpEarner(),
+            lpEarner,
             block.timestamp
         );
     }
@@ -1531,7 +1467,7 @@ contract Xpast is BEP20 {
         return _excludedFromAntiWhale[_account];
     }
 
-    // To receive BNB from swapRouter when swapping
+    // To receive FTM from swapRouter when swapping
     receive() external payable {}
 
     /**
@@ -1560,7 +1496,7 @@ contract Xpast is BEP20 {
      */
     function updateMaxTransferAmountRate(uint16 _maxTransferAmountRate) public onlyOperator {
         require(_maxTransferAmountRate <= 10000, "XPAST::updateMaxTransferAmountRate: Max transfer amount to High.");
-        require(_maxTransferAmountRate >= 100, "XPAST::updateMaxTransferAmountRate: Min transfer amount to Low.");
+        require(_maxTransferAmountRate >= 500, "XPAST::updateMaxTransferAmountRate: Min transfer amount to Low.");
         emit MaxTransferAmountRateUpdated(msg.sender, maxTransferAmountRate, _maxTransferAmountRate);
         maxTransferAmountRate = _maxTransferAmountRate;
     }
@@ -1580,6 +1516,7 @@ contract Xpast is BEP20 {
      */
     function setExcludedFromAntiWhale(address _account, bool _excluded) public onlyOperator {
         _excludedFromAntiWhale[_account] = _excluded;
+        emit SetExcludedFromAntiWhale(msg.sender, _account, _excluded);
     }
 
     /**
@@ -1596,6 +1533,7 @@ contract Xpast is BEP20 {
      * Can only be called by the current operator.
      */
     function updateSwapRouter(address _router) public onlyOperator {
+        require (address(swapRouter) == address(0), "Router already set");
         swapRouter = IUniswapV2Router02(_router);
         swapPair = IUniswapV2Factory(swapRouter.factory()).getPair(address(this), swapRouter.WETH());
         require(swapPair != address(0), "XPAST::updateSwapRouter: Invalid pair address.");
@@ -1606,165 +1544,17 @@ contract Xpast is BEP20 {
      * @dev Update the no Tax Contract Address.
      * Can only be called by the current operator.
      */
-    function setNoTaxSenderAddr(address _noTaxSenderAddr) public onlyOperator {
-        noTaxSenderAddr = _noTaxSenderAddr;
-        emit SetNoTaxSenderAddr(msg.sender, _noTaxSenderAddr);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr(address _noTaxRecipientAddr) public onlyOperator {
-        noTaxRecipientAddr = _noTaxRecipientAddr;
-        emit SetNoTaxRecipientAddr(msg.sender, _noTaxRecipientAddr);
+
+    function setNoTaxSenderAddr(address _noTaxSenderAddr, bool _value) external onlyOperator {
+        noTaxSender[_noTaxSenderAddr] = _value;
+        emit SetNoTaxSenderAddr(msg.sender, _noTaxSenderAddr, _value);
     }
 
-    /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxSenderAddr1(address _noTaxSenderAddr1) public onlyOperator {
-        noTaxSenderAddr1 = _noTaxSenderAddr1;
-        emit SetNoTaxSenderAddr1(msg.sender, _noTaxSenderAddr1);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr1(address _noTaxRecipientAddr1) public onlyOperator {
-        noTaxRecipientAddr1 = _noTaxRecipientAddr1;
-        emit SetNoTaxRecipientAddr1(msg.sender, _noTaxRecipientAddr1);
+    function setNoTaxRecipientAddr(address _noTaxRecipientAddr, bool _value) external onlyOperator {
+        noTaxRecipient[_noTaxRecipientAddr] = _value;
+        emit SetNoTaxRecipientAddr(msg.sender, _noTaxRecipientAddr, _value);
     }
 
-    /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxSenderAddr2(address _noTaxSenderAddr2) public onlyOperator {
-        noTaxSenderAddr2 = _noTaxSenderAddr2;
-        emit SetNoTaxSenderAddr2(msg.sender, _noTaxSenderAddr2);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr2(address _noTaxRecipientAddr2) public onlyOperator {
-        noTaxRecipientAddr2 = _noTaxRecipientAddr2;
-        emit SetNoTaxRecipientAddr2(msg.sender, _noTaxRecipientAddr2);
-    }
-
-
-    /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxSenderAddr3(address _noTaxSenderAddr3) public onlyOperator {
-        noTaxSenderAddr3 = _noTaxSenderAddr3;
-        emit SetNoTaxSenderAddr3(msg.sender, _noTaxSenderAddr3);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr3(address _noTaxRecipientAddr3) public onlyOperator {
-        noTaxRecipientAddr3 = _noTaxRecipientAddr3;
-        emit SetNoTaxRecipientAddr3(msg.sender, _noTaxRecipientAddr3);
-    }
-
-    /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxSenderAddr4(address _noTaxSenderAddr4) public onlyOperator {
-        noTaxSenderAddr4 = _noTaxSenderAddr4;
-        emit SetNoTaxSenderAddr4(msg.sender, _noTaxSenderAddr4);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr4(address _noTaxRecipientAddr4) public onlyOperator {
-        noTaxRecipientAddr4 = _noTaxRecipientAddr4;
-        emit SetNoTaxRecipientAddr4(msg.sender, _noTaxRecipientAddr4);
-    }
-
-    /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxSenderAddr5(address _noTaxSenderAddr5) public onlyOperator {
-        noTaxSenderAddr5 = _noTaxSenderAddr5;
-        emit SetNoTaxSenderAddr5(msg.sender, _noTaxSenderAddr5);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr5(address _noTaxRecipientAddr5) public onlyOperator {
-        noTaxRecipientAddr5 = _noTaxRecipientAddr5;
-        emit SetNoTaxRecipientAddr5(msg.sender, _noTaxRecipientAddr5);
-    }
-
-    /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxSenderAddr6(address _noTaxSenderAddr6) public onlyOperator {
-        noTaxSenderAddr6 = _noTaxSenderAddr6;
-        emit SetNoTaxSenderAddr6(msg.sender, _noTaxSenderAddr6);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr6(address _noTaxRecipientAddr6) public onlyOperator {
-        noTaxRecipientAddr6 = _noTaxRecipientAddr6;
-        emit SetNoTaxRecipientAddr6(msg.sender, _noTaxRecipientAddr6);
-    }
-
-
-    /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxSenderAddr7(address _noTaxSenderAddr7) public onlyOperator {
-        noTaxSenderAddr7 = _noTaxSenderAddr7;
-        emit SetNoTaxSenderAddr7(msg.sender, _noTaxSenderAddr7);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr7(address _noTaxRecipientAddr7) public onlyOperator {
-        noTaxRecipientAddr7 = _noTaxRecipientAddr7;
-        emit SetNoTaxRecipientAddr7(msg.sender, _noTaxRecipientAddr7);
-    }
-
-    /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxSenderAddr8(address _noTaxSenderAddr8) public onlyOperator {
-        noTaxSenderAddr8 = _noTaxSenderAddr8;
-        emit SetNoTaxSenderAddr8(msg.sender, _noTaxSenderAddr8);
-    }
-    
-     /**
-     * @dev Update the no Tax Contract Address.
-     * Can only be called by the current operator.
-     */
-    function setNoTaxRecipientAddr8(address _noTaxRecipientAddr8) public onlyOperator {
-        noTaxRecipientAddr8 = _noTaxRecipientAddr8;
-        emit SetNoTaxRecipientAddr8(msg.sender, _noTaxRecipientAddr8);
-    }
 
 
     /**
@@ -1774,27 +1564,6 @@ contract Xpast is BEP20 {
         return _operator;
     }
     
-    /**
-     * @dev Returns the address of the current operator.
-     */
-    function viewLpEarner() public view returns (address) {
-        return lpEarner;
-    }
-    
-    /**
-     * @dev Update the no lpEarner address.
-     * Can only be called by the current operator.
-     */
-    function setLpEarnerAddr(address _lpEarner) public onlyOperator {
-        lpEarner = _lpEarner;
-        emit SetLpEarnerAddr(msg.sender, _lpEarner);
-    }
-    
-    
-    // Pay out any token from Token Contract
-    function payoutToken(address _token, uint256 _amount) public onlyOperator {
-    BEP20(_token).transfer(msg.sender, _amount);
-    }
 
     /**
      * @dev Transfers operator of the contract to a new account (`newOperator`).
@@ -1900,5 +1669,403 @@ library SafeERC20 {
             // solhint-disable-next-line max-line-length
             require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
+    }
+}
+
+// MasterChef is the master of XPAST. He can make Xpast and he is a fair guy.
+//
+// Note that it's ownable and the owner wields tremendous power. The ownership
+// will be transferred to a governance smart contract once XPAST is sufficiently
+// distributed and the community can show to govern itself.
+//
+// Have fun reading it. Hopefully it's bug-free. God bless.
+contract MasterChef is Ownable, ReentrancyGuard {
+    using SafeMath for uint256;
+    using SafeERC20 for IBEP20;
+
+    // Info of each user.
+    struct UserInfo {
+        uint256 amount; // How many LP tokens the user has provided.
+        uint256 rewardDebt; // Reward debt. See explanation below.
+        //
+        // We do some fancy math here. Basically, any point in time, the amount of XPAST
+        // entitled to a user but is pending to be distributed is:
+        //
+        //   pending reward = (user.amount * pool.accXpastPerShare) - user.rewardDebt
+        //
+        // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
+        //   1. The pool's `accXpastPerShare` (and `lastRewardBlock`) gets updated.
+        //   2. User receives the pending reward sent to his/her address.
+        //   3. User's `amount` gets updated.
+        //   4. User's `rewardDebt` gets updated.
+    }
+
+    // Info of each pool.
+    struct PoolInfo {
+        IBEP20 lpToken; // Address of LP token contract.
+        uint256 allocPoint; // How many allocation points assigned to this pool. XPASTs to distribute per second.
+        uint256 lastRewardSecond; // Last second that XPASTs distribution occurs.
+        uint256 accXpastPerShare; // Accumulated XPASTs per share, times 1e18. See below.
+        uint16 depositFeeBP; // Deposit fee in basis points
+        uint256 lpSupply;
+    }
+
+    // The XPAST TOKEN!
+    Xpast public xpast;
+    // Dev address.
+    address public devaddr;
+    // XPAST tokens created per second.
+    uint256 public XpastPerSecond;
+    // Deposit Fee address
+    address public feeAddress;
+    // Max emission rate.
+    uint256 public constant MAX_EMISSION_RATE = 5 ether;
+
+    // Info of each pool.
+    PoolInfo[] public poolInfo;
+    // Info of each user that stakes LP tokens.
+    mapping(uint256 => mapping(address => UserInfo)) public userInfo;
+    // Total allocation points. Must be the sum of all allocation points in all pools.
+    uint256 public totalAllocPoint = 0;
+    // The block timestamp when Xpast mining starts.
+    uint256 public startTime;
+
+    event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
+    event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
+    event EmergencyWithdraw(
+        address indexed user,
+        uint256 indexed pid,
+        uint256 amount
+    );
+    event SetFeeAddress(address indexed user, address indexed newAddress);
+    event SetDevAddress(address indexed user, address indexed newAddress);
+    event UpdateEmissionRate(address indexed user, uint256 XpastPerSecond);
+    event addPool(
+        uint256 indexed pid,
+        address lpToken,
+        uint256 allocPoint,
+        uint256 depositFeeBP
+    );
+    event setPool(
+        uint256 indexed pid,
+        address lpToken,
+        uint256 allocPoint,
+        uint256 depositFeeBP
+    );
+    event UpdateStartTime(uint256 newStartTime);
+
+    constructor(
+        Xpast _xpast,
+        address _devaddr,
+        address _feeAddress,
+        uint256 _XpastPerSecond,
+        uint256 _startTime
+    ) public {
+        xpast = _xpast;
+        devaddr = _devaddr;
+        feeAddress = _feeAddress;
+        XpastPerSecond = _XpastPerSecond;
+        startTime = _startTime;
+    }
+
+    function poolLength() external view returns (uint256) {
+        return poolInfo.length;
+    }
+
+    mapping(IBEP20 => bool) public poolExistence;
+    modifier nonDuplicated(IBEP20 _lpToken) {
+        require(poolExistence[_lpToken] == false, "nonDuplicated: duplicated");
+        _;
+    }
+
+    // Add a new lp to the pool. Can only be called by the owner.
+    function add(
+        uint256 _allocPoint,
+        IBEP20 _lpToken,
+        uint16 _depositFeeBP,
+        bool _withUpdate
+    ) external onlyOwner nonDuplicated(_lpToken) {
+        // valid ERC20 token
+        _lpToken.balanceOf(address(this));
+
+        require(_depositFeeBP <= 400, "add: invalid deposit fee basis points");
+        if (_withUpdate) {
+            massUpdatePools();
+        }
+        uint256 lastRewardSecond = block.timestamp > startTime
+            ? block.timestamp
+            : startTime;
+        totalAllocPoint = totalAllocPoint.add(_allocPoint);
+        poolExistence[_lpToken] = true;
+        poolInfo.push(
+            PoolInfo({
+                lpToken: _lpToken,
+                allocPoint: _allocPoint,
+                lastRewardSecond: lastRewardSecond,
+                accXpastPerShare: 0,
+                depositFeeBP: _depositFeeBP,
+                lpSupply: 0
+            })
+        );
+
+        emit addPool(
+            poolInfo.length - 1,
+            address(_lpToken),
+            _allocPoint,
+            _depositFeeBP
+        );
+    }
+
+    // Update the given pool's Xpast allocation point and deposit fee. Can only be called by the owner.
+    function set(
+        uint256 _pid,
+        uint256 _allocPoint,
+        uint16 _depositFeeBP,
+        bool _withUpdate
+    ) external onlyOwner {
+        require(_depositFeeBP <= 400, "set: invalid deposit fee basis points");
+        if (_withUpdate) {
+            massUpdatePools();
+        }
+        totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(
+            _allocPoint
+        );
+        poolInfo[_pid].allocPoint = _allocPoint;
+        poolInfo[_pid].depositFeeBP = _depositFeeBP;
+
+        emit setPool(
+            _pid,
+            address(poolInfo[_pid].lpToken),
+            _allocPoint,
+            _depositFeeBP
+        );
+    }
+
+    // Return reward multiplier over the given _from to _to block.
+    function getMultiplier(uint256 _from, uint256 _to)
+        public
+        pure
+        returns (uint256)
+    {
+        return _to.sub(_from);
+    }
+
+    // View function to see pending xpast on frontend.
+    function pendingXpast(uint256 _pid, address _user)
+        external
+        view
+        returns (uint256)
+    {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][_user];
+        uint256 accXpastPerShare = pool.accXpastPerShare;
+        if (
+            block.timestamp > pool.lastRewardSecond &&
+            pool.lpSupply != 0 &&
+            totalAllocPoint > 0
+        ) {
+            uint256 multiplier = getMultiplier(
+                pool.lastRewardSecond,
+                block.timestamp
+            );
+            uint256 xpastReward = multiplier
+                .mul(XpastPerSecond)
+                .mul(pool.allocPoint)
+                .div(totalAllocPoint);
+                uint256 devReward = xpastReward.div(10);
+                uint256 totalRewards = xpast.totalSupply().add(devReward).add(
+                xpastReward
+            );
+                if (totalRewards > xpast.maxSupply()) {
+                xpastReward = xpast.maxSupply().sub(xpast.totalSupply());
+            }
+            accXpastPerShare = accXpastPerShare.add(
+                xpastReward.mul(1e18).div(pool.lpSupply)
+            );
+        }
+        return user.amount.mul(accXpastPerShare).div(1e18).sub(user.rewardDebt);
+    }
+
+    // Update reward variables for all pools. Be careful of gas spending!
+    function massUpdatePools() public {
+        uint256 length = poolInfo.length;
+        for (uint256 pid = 0; pid < length; ++pid) {
+            updatePool(pid);
+        }
+    }
+
+    // Update reward variables of the given pool to be up-to-date.
+    function updatePool(uint256 _pid) public {
+        PoolInfo storage pool = poolInfo[_pid];
+        if (block.timestamp <= pool.lastRewardSecond) {
+            return;
+        }
+        if (pool.lpSupply == 0 || pool.allocPoint == 0) {
+            pool.lastRewardSecond = block.timestamp;
+            return;
+        }
+        uint256 multiplier = getMultiplier(
+            pool.lastRewardSecond,
+            block.timestamp
+        );
+        uint256 xpastReward = multiplier
+            .mul(XpastPerSecond)
+            .mul(pool.allocPoint)
+            .div(totalAllocPoint);
+
+        uint256 devReward = xpastReward.div(10);
+        uint256 totalRewards = xpast.totalSupply().add(devReward).add(
+            xpastReward
+        );
+
+        if (totalRewards <= xpast.maxSupply()) {
+            // mint as normal as not at maxSupply
+            xpast.mint(devaddr, xpastReward.div(10));
+            xpast.mint(address(this), xpastReward);
+        } else {
+            // mint the difference only to MC, update xpastReward
+            xpastReward = xpast.maxSupply().sub(xpast.totalSupply());
+            xpast.mint(address(this), xpastReward);
+        }
+
+        if (xpastReward != 0) {
+            // only calculate and update if xpastReward is non 0
+            pool.accXpastPerShare = pool.accXpastPerShare.add(
+                xpastReward.mul(1e18).div(pool.lpSupply)
+            );
+        }
+
+        pool.lastRewardSecond = block.timestamp;
+    }
+
+    // Deposit LP tokens to MasterChef for Xpast allocation.
+    function deposit(uint256 _pid, uint256 _amount) external nonReentrant {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        updatePool(_pid);
+        if (user.amount > 0) {
+            uint256 pending = user
+                .amount
+                .mul(pool.accXpastPerShare)
+                .div(1e18)
+                .sub(user.rewardDebt);
+            if (pending > 0) {
+                safeXpastTransfer(msg.sender, pending);
+            }
+        }
+        if (_amount > 0) {
+            uint256 balanceBefore = pool.lpToken.balanceOf(address(this));
+            pool.lpToken.safeTransferFrom(
+                address(msg.sender),
+                address(this),
+                _amount
+            );
+            _amount = pool.lpToken.balanceOf(address(this)).sub(balanceBefore);
+            if (pool.depositFeeBP > 0) {
+                uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
+                pool.lpToken.safeTransfer(feeAddress, depositFee);
+                user.amount = user.amount.add(_amount).sub(depositFee);
+                pool.lpSupply = pool.lpSupply.add(_amount).sub(depositFee);
+            } else {
+                user.amount = user.amount.add(_amount);
+                pool.lpSupply = pool.lpSupply.add(_amount);
+            }
+        }
+        user.rewardDebt = user.amount.mul(pool.accXpastPerShare).div(1e18);
+        emit Deposit(msg.sender, _pid, _amount);
+    }
+
+    // Withdraw LP tokens from MasterChef.
+    function withdraw(uint256 _pid, uint256 _amount) external nonReentrant {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        require(user.amount >= _amount, "withdraw: not good");
+        updatePool(_pid);
+        uint256 pending = user.amount.mul(pool.accXpastPerShare).div(1e18).sub(
+            user.rewardDebt
+        );
+        if (pending > 0) {
+            safeXpastTransfer(msg.sender, pending);
+        }
+        if (_amount > 0) {
+            user.amount = user.amount.sub(_amount);
+            pool.lpToken.safeTransfer(address(msg.sender), _amount);
+            pool.lpSupply = pool.lpSupply.sub(_amount);
+        }
+        user.rewardDebt = user.amount.mul(pool.accXpastPerShare).div(1e18);
+        emit Withdraw(msg.sender, _pid, _amount);
+    }
+
+    // Withdraw without caring about rewards. EMERGENCY ONLY.
+    function emergencyWithdraw(uint256 _pid) external nonReentrant {
+        PoolInfo storage pool = poolInfo[_pid];
+        UserInfo storage user = userInfo[_pid][msg.sender];
+        uint256 amount = user.amount;
+        user.amount = 0;
+        user.rewardDebt = 0;
+        pool.lpToken.safeTransfer(address(msg.sender), amount);
+
+        if (pool.lpSupply >= amount) {
+            pool.lpSupply = pool.lpSupply.sub(amount);
+        } else {
+            pool.lpSupply = 0;
+        }
+
+        emit EmergencyWithdraw(msg.sender, _pid, amount);
+    }
+
+    // Safe xpast transfer function, just in case if rounding error causes pool to not have enough XPASTs.
+    function safeXpastTransfer(address _to, uint256 _amount) internal {
+        uint256 xpastBal = xpast.balanceOf(address(this));
+        bool transferSuccess = false;
+        if (_amount > xpastBal) {
+            transferSuccess = xpast.transfer(_to, xpastBal);
+        } else {
+            transferSuccess = xpast.transfer(_to, _amount);
+        }
+        require(transferSuccess, "safeXpastTransfer: transfer failed");
+    }
+
+    // Update dev address.
+    function setDevAddress(address _devaddr) external {
+        require(_devaddr != address(0), "!nonzero");
+        require(msg.sender == devaddr, "dev: wut?");
+        devaddr = _devaddr;
+        emit SetDevAddress(msg.sender, _devaddr);
+    }
+
+    function setFeeAddress(address _feeAddress) external {
+        require(msg.sender == feeAddress, "setFeeAddress: FORBIDDEN");
+        require(_feeAddress != address(0), "!nonzero");
+        feeAddress = _feeAddress;
+        emit SetFeeAddress(msg.sender, _feeAddress);
+    }
+
+    //Pancake has to add hidden dummy pools inorder to alter the emission, here we make it simple and transparent to all.
+    function updateEmissionRate(uint256 _XpastPerSecond) external onlyOwner {
+        require(_XpastPerSecond <= MAX_EMISSION_RATE, "Emission too high");
+        massUpdatePools();
+        XpastPerSecond = _XpastPerSecond;
+        emit UpdateEmissionRate(msg.sender, _XpastPerSecond);
+    }
+
+    // Only update before start of farm
+    function updateStartTime(uint256 _newStartTime) external onlyOwner {
+        require(
+            block.timestamp < startTime,
+            "cannot change start time if farm has already started"
+        );
+        require(
+            block.timestamp < _newStartTime,
+            "cannot set start time in the past"
+        );
+        uint256 length = poolInfo.length;
+        for (uint256 pid = 0; pid < length; ++pid) {
+            PoolInfo storage pool = poolInfo[pid];
+            pool.lastRewardSecond = _newStartTime;
+        }
+        startTime = _newStartTime;
+
+        emit UpdateStartTime(startTime);
     }
 }
